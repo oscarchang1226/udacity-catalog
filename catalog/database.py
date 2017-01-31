@@ -4,6 +4,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 
+import datetime
+
 Base = declarative_base()
 
 
@@ -15,7 +17,7 @@ class User(Base):
     name = Column(String(250), nullable=False)
     salt = Column(String(250), nullable=False)
     hash = Column(String(250), nullable=False)
-    registered_on = Column(DateTime, server_default=text("NOW()"))
+    registered_on = Column(DateTime, default=datetime.datetime.utcnow)
     img_url = Column(String(250))
 
     @property
@@ -35,7 +37,7 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
-    created_on = Column(DateTime, server_default=text("NOW()"))
+    created_on = Column(DateTime, default=datetime.datetime.utcnow)
     description = Column(Text)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     user = relationship(User)
@@ -57,7 +59,7 @@ class Item(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
-    created_on = Column(DateTime, server_default=text("NOW()"))
+    created_on = Column(DateTime, default=datetime.datetime.utcnow)
     description = Column(Text)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     user = relationship(User)
@@ -79,9 +81,10 @@ class Item(Base):
 class CategoryVisit(Base):
     __tablename__ = "category_visit"
 
+    id = Column(Integer, primary_key=True)
     category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
     category = relationship(Category)
-    visits = Column(Integer, server_default=1)
+    visits = Column(Integer, server_default="1")
 
     @property
     def serialize(self):
@@ -89,6 +92,7 @@ class CategoryVisit(Base):
             Return object in JSON format
         """
         return {
+            "id": self.id,
             "visits": self.visits
         }
 
@@ -96,9 +100,10 @@ class CategoryVisit(Base):
 class ItemVisit(Base):
     __tablename__ = "item_visit"
 
+    id = Column(Integer, primary_key=True)
     item_id = Column(Integer, ForeignKey("item.id"), nullable=False)
     item = relationship(Item)
-    visits = Column(Integer, server_default=1)
+    visits = Column(Integer, server_default="1")
 
     @property
     def serialize(self):
@@ -106,6 +111,7 @@ class ItemVisit(Base):
             Return object in JSON format
         """
         return {
+            "id": self.id,
             "visits": self.visits
         }
 
