@@ -16,6 +16,17 @@ class User(Base):
     hash = Column(String(250), nullable=False)
     img_url = Column(String(250))
 
+    @property
+    def serialize(self):
+        """
+            Return object in JSON format
+        """
+        return {
+            "id": self.id,
+            "email": self.email,
+            "name": self.name
+        }
+
 
 class Category(Base):
     __tablename__ = "category"
@@ -24,6 +35,16 @@ class Category(Base):
     name = Column(String(250), nullable=False)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     user = relationship(User)
+
+    @property
+    def serialize(self):
+        """
+            Return object in JSON format
+        """
+        return {
+            "id": self.id,
+            "name": self.name
+        }
 
 
 class Item(Base):
@@ -35,6 +56,16 @@ class Item(Base):
     user = relationship(User)
     category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
     category = relationship(Category)
+
+    @property
+    def serialize(self):
+        """
+            Return object in JSON format
+        """
+        return {
+            "id": self.id,
+            "name": self.name
+        }
 
 engine = create_engine("sqlite:///catalog.db")
 
