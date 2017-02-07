@@ -1,38 +1,41 @@
 from flask import Flask, render_template, request, redirect, jsonify
 from flask import url_for, flash, session, make_response
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+import utils
+from dummy import items, item, categories, category
 
-from database import Base, User, Category, Item
 
-import string
-import random
+def render(template, **params):
+    params["categories"] = categories
+    return render_template(template, **params)
 
 app = Flask(__name__)
 
 
 @app.route("/")
 def showItems():
-    return "Show recently added items (10)"
+    # return "Show recently added items (10)"
+    return render("home.html", items=items)
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if(request.method == "GET"):
-        return "show register form"
+        # return "show register form"
+        return render_template("register.html")
 
     if(request.method == "POST"):
-        return "register user"
+        return redirect(url_for("showItems"))
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if(request.method == "GET"):
-        return "Login form"
+        # return "Login form"
+        return render_template("login.html")
 
     if(request.method == "POST"):
-        return "login user"
+        return redirect(url_for("showItems"))
 
 
 @app.route("/logout", methods=["POST"])

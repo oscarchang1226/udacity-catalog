@@ -1,0 +1,18 @@
+{% extends "main.html" %}
+{% block content %}
+<form method="POST" action="#">
+    <label>
+        <span>Email</span>
+        <input type="email" name="email"/>
+    </label>
+    <label>
+        <span>Password</span>
+        <input type="password" name="password"/>
+    </label>
+    <label>
+        <span>Confirm Password</span>
+        <input type="password" name="confirm"/>
+    </label>
+    <input type="submit" />
+</form>
+{% endblock %}
