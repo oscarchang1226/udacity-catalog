@@ -1,0 +1,8 @@
+{% extends "main.html" %}
+{% block content %}
+<form method="POST" action="#">
+    <span>Delete item {{item.name}}?</span>
+    <input type="submit" value="Delete"/>
+    <a href="#">Cancel</a>
+</form>
+{% endblock %}

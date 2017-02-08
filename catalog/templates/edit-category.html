@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+{% block content %}
+<form method="POST" action="#">
+    <span>Edit Category</span>
+    <label>
+        <span>Name</span>
+        <input type="text" name="category_name" value="{{category.name}}"/>
+    </label>
+    <label>
+        <span>Description</span>
+        <textarea name="category_description">{{category.description}}</textarea>
+    </label>
+    <input type="submit"/>
+</form>
+{% endblock %}

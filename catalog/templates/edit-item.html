@@ -1,0 +1,25 @@
+{% extends "main.html" %}
+{% block content %}
+<form method="POST" action="#">
+    <span>Edit item</span>
+    <label>
+        <span>Name</span>
+        <input type="text" name="item_name" value="{{item.name}}"/>
+    </label>
+    <label>
+        <span>Description</span>
+        <textarea name="item_description">{{item.description}}</textarea>
+    </label>
+    <select name="item_category_id">
+        <option value="">Select Category</option>
+        {% for category in categories %}
+            <option value="{{category.id}}"
+                {% if item.category_id == category.id %}
+                    selected
+                {% endif %}
+                >{{category.name}}</option>
+        {% endfor %}
+    </select>
+    <input type="submit"/>
+</form>
+{% endblock %}

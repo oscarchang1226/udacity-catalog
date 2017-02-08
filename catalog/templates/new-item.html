@@ -1,0 +1,21 @@
+{% extends "main.html" %}
+{% block content %}
+<form method="POST" action="#">
+    <span>New Item</span>
+    <label>
+        <span>Name</span>
+        <input type="input" name="item_name"/>
+    </label>
+    <label>
+        <span>Description</span>
+        <textarea name="item_description"></textarea>
+    </label>
+    <select name="item_category_id">
+        <option value="">Select Category</option>
+        {% for category in categories %}
+            <option value="{{category.id}}">{{category.name}}</option>
+        {% endfor %}
+    </select>
+    <input type="submit"/>
+</form>
+{% endblock %}
