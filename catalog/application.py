@@ -9,11 +9,12 @@ def render(template, **params):
     params["categories"] = categories
     return render_template(template, **params)
 
+
 app = Flask(__name__)
 
 
 @app.route("/")
-def showItems():
+def home():
     # return "Show recently added items (10)"
     return render("home.html", items=items)
 
@@ -22,20 +23,20 @@ def showItems():
 def register():
     if(request.method == "GET"):
         # return "show register form"
-        return render_template("register.html")
+        return render("register.html")
 
     if(request.method == "POST"):
-        return redirect(url_for("showItems"))
+        return redirect(url_for("home"))
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if(request.method == "GET"):
         # return "Login form"
-        return render_template("login.html")
+        return render("login.html")
 
     if(request.method == "POST"):
-        return redirect(url_for("showItems"))
+        return redirect(url_for("home"))
 
 
 @app.route("/logout", methods=["POST"])
@@ -46,61 +47,64 @@ def logout():
 
 @app.route("/categories/<int:category_id>/items")
 def showCategoryItems(category_id):
-    return "Show category items"
-
-
-@app.route("/categories/<int:category_id>/items/new", methods=["GET", "POST"])
-def newItem(category_id):
-    if(request.method == "GET"):
-        return "show new item form"
-
-    if(request.method == "POST"):
-        return "add new item"
+    return render(
+        "category-items.html", category=category, items=items
+    )
 
 
 @app.route("/categories/new", methods=["GET", "POST"])
 def newCategory():
     if(request.method == "GET"):
-        return "Show new category form"
+        return render("new-category.html")
 
     if(request.method == "POST"):
-        return "Add new category"
+        return redirect(url_for("home"))
 
 
 @app.route("/categories/<int:category_id>/edit", methods=["GET", "POST"])
 def editCategory(category_id):
     if(request.method == "GET"):
-        return "Show edit category form"
+        return render("edit-category.html", category=category)
 
     if(request.method == "POST"):
-        return "Update category"
+        return redirect(url_for("home"))
 
 
 @app.route("/categories/<int:category_id>/delete", methods=["GET", "POST"])
 def deleteCategory(category_id):
     if(request.method == "GET"):
-        return "Show delete category form"
+        return render("delete-category.html", categor=category)
 
     if(request.method == "POST"):
-        return "Delete category and all it's item"
+        return redirect(url_for("home"))
+
+
+@app.route("/items/new", methods=["GET", "POST"])
+def newItem(category_id):
+    if(request.method == "GET"):
+        # Categories are already passed in by default.
+        return render("new-item.html")
+
+    if(request.method == "POST"):
+        return redirect(url_for("home"))
 
 
 @app.route("/items/<int:item_id>/edit", methods=["GET", "POST"])
 def editItem(item_id):
     if(request.method == "GET"):
-        return "Show item edit form"
+        return render("edit-item.html", item=item)
 
     if(request.method == "POST"):
-        return "Update item"
+        return redirect(url_for("home"))
 
 
 @app.route("/items/<int:item_id>/delete", methods=["GET", "POST"])
 def deleteItem(item_id):
     if(request.method == "GET"):
-        return "delete item form"
+        return render("delete-item.html", item=item)
 
     if(request.method == "POST"):
-        return "delete item"
+        return redirect(url_for("home"))
 
 
 @app.route("/api/categories")
