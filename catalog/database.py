@@ -13,7 +13,7 @@ class User(Base):
     __tablename__ = "user"
 
     id = Column(Integer, primary_key=True)
-    email = Column(String(250), nullable=False)
+    email = Column(String(250), nullable=False, unique=True)
     name = Column(String(250), nullable=False)
     salt = Column(String(250), nullable=False)
     hash = Column(String(250), nullable=False)
