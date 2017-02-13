@@ -6,12 +6,26 @@ from database import Base, User, Category, Item
 import string
 import random
 import hmac
+import re
+
+PASSWORD_RE = re.compile(r"^[a-zA-Z0-9].{3,20}$")
+EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
 
 engine = create_engine("sqlite:///catalog.db")
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
+
+def emailIsValid(email):
+    """Return true if email is valid otherwise false"""
+    return EMAIL_RE.match(email) is not None
+
+
+def passwordIsValid(password):
+    """Return true if password is valid otherwise false"""
+    return PASSWORD_RE.match(password) is not None
 
 
 def generateRandomString(n=5):
@@ -35,9 +49,11 @@ def createUser(**params):
     Return None if failed to add.
     """
     new_user = User(
-        email=params["email"], name=params["name"],
+        email=params["email"],
         salt=params["salt"], hash=params["hash"]
     )
+    if("name" in params):
+        new_user.name = params["name"]
     try:
         session.add(new_user)
         session.commit()
@@ -74,15 +90,24 @@ def deleteUser(id):
         session.commit()
 
 
+def getCategories():
+    """Get all categories"""
+    return session.query(Category).all()
+
+
 def createCategory(**params):
     """
     Creates a category and returns it
     Return None if fail.
     """
-    category = Category(
-        name=params["name"], description=params["description"],
-        user=params["user"]
-    )
+    category = Category()
+    if("name" in params):
+        category.name = params["name"]
+    if("description" in params):
+        category.description = params["description"]
+    if("user_id" in params):
+        category.user_id = params["user_id"]
+
     try:
         session.add(category)
         session.commit()
@@ -99,14 +124,15 @@ def getCategoriesByUserId(id):
 def getCategoryById(id):
     """Return category by given category id"""
     category = session.query(Category).get(id)
+    return category
 
 
 def editCategory(id, **params):
     """Return edited category"""
     edit_category = getCategoryById(id)
-    if(params["name"]):
+    if("name" in params):
         edit_category.name = params["name"]
-    if(params["description"]):
+    if("description" in params):
         edit_category.description = params["description"]
     try:
         session.add(edit_category)
@@ -124,4 +150,74 @@ def deleteCategory(id):
         session.delete(delete_category)
         session.commit()
     except(Exception):
+        session.rollback()
+
+
+def createItem(**params):
+    """Create an item."""
+    item = Item()
+    if("name" in params):
+        item.name = params["name"]
+    if("description" in params):
+        item.description = params["description"]
+    if("user_id" in params):
+        item.user_id = params["user_id"]
+    if("category_id" in params):
+        item.category_id = params["category_id"]
+
+    try:
+        session.add(item)
+        session.commit()
+    except Exception:
+        session.rollback()
+        item = None
+    return item
+
+
+def getItems(n=10):
+    """Return items ordered descending by created on"""
+    return session.query(Item).order_by(Item.created_on.desc()).limit(n).all()
+
+
+def getItemsByCategoryId(category_id):
+    """Return items under given category"""
+    return session.query(Item).filter_by(
+        category_id=category_id
+    ).all()
+
+
+def getItemsByUserId(user_id):
+    """Return items created by given user"""
+    return session.query(Item).filter_by(
+        user_id=user_id
+    ).all()
+
+
+def getItemById(id):
+    """Return item with given id"""
+    item = session.query(Item).get(id)
+    return item
+
+
+def editItem(id, **params):
+    item = getItemById(id)
+    if("name" in params):
+        item.name = params["name"]
+    if("description" in params):
+        item.description = params["description"]
+    try:
+        session.add(item)
+        session.commit()
+    except Exception:
+        session.rollback()
+        return None
+    return item
+
+
+def deleteItem(id):
+    delete_item = getItemById(id)
+    try:
+        session.delete(delete_item)
+        session.commit()
+    except Exception:
         session.rollback()

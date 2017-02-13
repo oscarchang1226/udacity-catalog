@@ -8,18 +8,8 @@ class TestSuite(unittest.TestCase):
     email = "chang@example.com"
     salt = utils.generateRandomString()
     hash = utils.generateHash("chang", salt)
-    user = None
 
-    @classmethod
-    def tearDownClass(self):
-        # Delete categories assign by user
-        for category in utils.getCategoriesByUserId(self.user.id):
-            utils.deleteCategory(category)
-
-        # Delete assigned user
-        utils.deleteUser(self.user.id)
-
-    def testUserFunction(self):
+    def testA(self):
         name = "Oscar"
         email = "oscarchang1226@example.com"
         fake_email = "changtun@example.com"
@@ -45,19 +35,18 @@ class TestSuite(unittest.TestCase):
         user = utils.getUserById(user.id)
         self.assertIsNone(user)
 
-        # Asign a user for test
-        self.user = utils.createUser(
+    def testB(self):
+
+        user = utils.createUser(
             name=self.name, email=self.email,
             salt=self.salt, hash=self.hash
         )
-
-    def testCategoryFunction(self):
 
         # Test create a category
         category = utils.createCategory(
             name="FruitsTest",
             description="the sweet and fleshy product of a tree or other plant that contains seed and can be eaten as food.",  # NOQA
-            user=self.user
+            user_id=user.id
         )
         self.assertIsNotNone(category)
 
@@ -66,14 +55,14 @@ class TestSuite(unittest.TestCase):
             "ChineseTest", "KoreanTest", "JapanseseTest", "FilipinoTest"
         ]
         for test in test_categories:
-            utils.createCategory(name=test, description=test)
+            utils.createCategory(name=test, description=test, user_id=user.id)
 
-        self.assertEquals(len(utils.getCategoriesByUserId(self.user.id)), 5)
+        self.assertEquals(len(utils.getCategoriesByUserId(user.id)), 5)
 
         # Test get all categories
         self.assertGreaterEqual(
             len(utils.getCategories()),
-            len(utils.getCategoriesByUserId(self.user.id))
+            len(utils.getCategoriesByUserId(user.id))
         )
 
         category_id = category.id
@@ -89,35 +78,60 @@ class TestSuite(unittest.TestCase):
         utils.deleteCategory(category_id)
         self.assertIsNone(utils.getCategoryById(category_id))
 
-    def testItemFunction(self):
+        for category in utils.getCategoriesByUserId(user.id):
+            utils.deleteCategory(category.id)
+
+        utils.deleteUser(user.id)
+
+    def testC(self):
+
+        user = utils.createUser(
+            name=self.name, email=self.email,
+            salt=self.salt, hash=self.hash
+        )
+
+        test_categories = [
+            "ChineseTest", "KoreanTest", "JapanseseTest", "FilipinoTest"
+        ]
+        for test in test_categories:
+            utils.createCategory(name=test, description=test, user_id=user.id)
+
         test_items = [
             "Item1", "Item2", "Item3", "Item4"
         ]
 
         # Test create items
-        for category in utils.getCategoriesByUserId(self.user.id):
+        for category in utils.getCategoriesByUserId(user.id):
             for item in test_items:
                 utils.createItem(
-                    name=item, user=self.user, category=category
+                    name=item, user_id=user.id, category_id=category.id
                 )
 
         # Test get items by category id
-        for category in utils.getCategoriesByUserId(self.user.id):
+        for category in utils.getCategoriesByUserId(user.id):
             self.assertEquals(
                 len(utils.getItemsByCategoryId(category.id)), 4
             )
 
         # Test edit items
-        for item in utils.getItemsByUserId(self.user.id):
+        for item in utils.getItemsByUserId(user.id):
             utils.editItem(item.id, description="IGNORE THIS TEST ITEM")
 
-        for item in utils.getItemsByUserId(self.user.id):
+        for item in utils.getItemsByUserId(user.id):
             self.assertEquals(item.description, "IGNORE THIS TEST ITEM")
 
+        # Test get items
+        self.assertGreaterEqual(len(utils.getItems(12)), 12)
+
         # Test delete items
-        for item in utils.getItemsByUserId(self.user.id):
-            utils.deleteItem(item)
-        self.assertFalse(list(utils.getItemsByUserId(self.user.id)))
+        for item in utils.getItemsByUserId(user.id):
+            utils.deleteItem(item.id)
+        self.assertFalse(list(utils.getItemsByUserId(user.id)))
+
+        for category in utils.getCategoriesByUserId(user.id):
+            utils.deleteCategory(category.id)
+
+        utils.deleteUser(user.id)
 
 
 if __name__ == "__main__":

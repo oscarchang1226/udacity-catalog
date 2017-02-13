@@ -14,7 +14,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     email = Column(String(250), nullable=False, unique=True)
-    name = Column(String(250), nullable=False)
+    name = Column(String(250))
     salt = Column(String(250), nullable=False)
     hash = Column(String(250), nullable=False)
     registered_on = Column(DateTime, default=datetime.datetime.utcnow)
