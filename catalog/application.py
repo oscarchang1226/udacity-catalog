@@ -7,6 +7,14 @@ from dummy import items, item, categories, category
 
 def render(template, **params):
     params["categories"] = categories
+    if("u-cookie" in session and session["u-cookie"]):
+        uid = session["u-cookie"].split("|")[0]
+        h = session["u-cookie"].split("|")[1]
+        u = utils.getUserById(uid)
+        if(u.hash == h):
+            params["user"] = u
+        else:
+            session.pop("u-cookie", None)
     return render_template(template, **params)
 
 
@@ -16,7 +24,7 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     # return "Show recently added items (10)"
-    return render("home.html", items=items)
+    return render("home.html", items=utils.getItems())
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -26,13 +34,44 @@ def register():
         return render("register.html")
 
     if(request.method == "POST"):
-        return redirect(url_for("home"))
+        if(request.form["email"] and request.form["password"] and
+           request.form["confirm"]):
+            register = True
+            if(not utils.emailIsValid(request.form["email"])):
+                flash("Please enter valid email.")
+                register = False
+            if(not utils.passwordIsValid(request.form["password"])):
+                flash("Please enter valid password. 3-20 alphanumeric characters.")  # NOQA
+                register = False
+            if(request.form["password"] != request.form["confirm"]):
+                flash("Password not matched.")
+                register = False
+            if(utils.getUserByEmail(request.form["email"]) is not None):
+                flash("Email has been registered.")
+                register = False
+
+            if(register):
+                flash("Your account is registered!")
+                salt = utils.generateRandomString()
+                user = utils.createUser(
+                    email=request.form["email"],
+                    salt=salt,
+                    hash=utils.generateHash(request.form["password"], salt)
+                )
+                session["u-cookie"] = "%s|%s" % (user.hash, user.id)
+                return redirect(url_for("home"))
+            else:
+                return render("register.html", email=request.form["email"])
+        else:
+            return render("register.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if(request.method == "GET"):
         # return "Login form"
+        if("u-cookie" in session and session["u-cookie"]):
+            return redirect(url_for("home"))
         return render("login.html")
 
     if(request.method == "POST"):

@@ -1,17 +1,17 @@
 {% extends "main.html" %}
 {% block content %}
-<form method="POST" action="#">
+<form method="POST" action="{{url_for('register')}}">
     <label>
         <span>Email</span>
-        <input type="email" name="email"/>
+        <input type="email" name="email" required value="{{email}}"/>
     </label>
     <label>
         <span>Password</span>
-        <input type="password" name="password"/>
+        <input type="password" name="password" required/>
     </label>
     <label>
         <span>Confirm Password</span>
-        <input type="password" name="confirm"/>
+        <input type="password" name="confirm" required/>
     </label>
     <input type="submit" />
 </form>
