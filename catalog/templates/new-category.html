@@ -1,14 +1,14 @@
 {% extends "main.html" %}
 {% block content %}
-<form method="POST" action="#">
+<form method="POST" action="{{url_for('newCategory')}}">
     <span>New Category</span>
     <label>
         <span>Name</span>
-        <input type="text" name="category_name"/>
+        <input type="text" name="category_name" value="{{category_name}}"/>
     </label>
     <label>
         <span>Description</span>
-        <textarea name="category_description"></textarea>
+        <textarea name="category_description">{{category_description}}</textarea>
     </label>
     <input type="submit"/>
 </form>

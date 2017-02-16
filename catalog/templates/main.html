@@ -7,12 +7,19 @@
     </head>
     <body>
         <nav>
+            <a href="{{url_for('home')}}">Home</a>
             {% for category in categories %}
-                <a href="#">{{category.name}}</a>
+                <a href="{{url_for('showCategoryItems', category_id=category.id)}}">{{category.name}}</a>
             {% endfor %}
             {% if user %}
-                <span>{{user.email}}</span>
-                <a href="{{url_for('logout')}}">Logout</a>
+                <a href="{{url_for('newCategory')}}">Add Category</a>
+                {% if category %}
+                    <a href="{{url_for('newItem', category_id=category.id)}}">Add Item</a>
+                {% endif %}
+                <form class="user-logout" action="{{url_for('logout')}}" method="post">
+                    <span>{{user.email}}</span>
+                    <input type="submit" name="logout" value="Logout">
+                </form>
             {% else %}
                 <a href="{{url_for('register')}}">Register</a>
                 <a href="{{url_for('login')}}">Login</a>

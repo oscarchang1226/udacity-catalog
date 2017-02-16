@@ -6,10 +6,10 @@ from dummy import items, item, categories, category
 
 
 def render(template, **params):
-    params["categories"] = categories
+    params["categories"] = utils.getCategories()
     if("u-cookie" in session and session["u-cookie"]):
-        uid = session["u-cookie"].split("|")[0]
-        h = session["u-cookie"].split("|")[1]
+        uid = session["u-cookie"].split("|")[1]
+        h = session["u-cookie"].split("|")[0]
         u = utils.getUserById(uid)
         if(u.hash == h):
             params["user"] = u
@@ -51,13 +51,17 @@ def register():
                 register = False
 
             if(register):
-                flash("Your account is registered!")
                 salt = utils.generateRandomString()
                 user = utils.createUser(
                     email=request.form["email"],
                     salt=salt,
                     hash=utils.generateHash(request.form["password"], salt)
                 )
+                if(user is None):
+                    flash("Failed to register user")
+                    return render("register.html")
+
+                flash("Your account is registered!")
                 session["u-cookie"] = "%s|%s" % (user.hash, user.id)
                 return redirect(url_for("home"))
             else:
@@ -75,13 +79,41 @@ def login():
         return render("login.html")
 
     if(request.method == "POST"):
-        return redirect(url_for("home"))
+        email = request.form["email"]
+        password = request.form["password"]
+        if(email and utils.emailIsValid(email)):
+            user = utils.getUserByEmail(email)
+            if(user and password):
+                print request.form
+                try:
+                    hash = utils.generateHash(str(password), str(user.salt))
+                    credentials = hash == user.hash
+                    if(credentials):
+                        session["u-cookie"] = "%s|%s" % (user.hash, user.id)
+                        return redirect(url_for("home"))
+                    else:
+                        flash("Credentials don't match. Please try again.")
+                except Exception as inst:
+                    flash("Something went wrong")
+                    print inst
+            else:
+                if(user):
+                    flash("Please enter login credentials.")
+                else:
+                    flash("Email is not registered.")
+        else:
+            flash("Email is invalid. Please enter a valid email.")
+
+        return render("login.html", email=email)
 
 
 @app.route("/logout", methods=["POST"])
 def logout():
     if(request.method == "POST"):
-        return "logout user"
+        if("u-cookie" in session):
+            flash("Logout Successful")
+            session.pop("u-cookie")
+        return redirect(url_for("home"))
 
 
 @app.route("/categories/<int:category_id>/items")
@@ -94,10 +126,45 @@ def showCategoryItems(category_id):
 @app.route("/categories/new", methods=["GET", "POST"])
 def newCategory():
     if(request.method == "GET"):
+        if("u-cookie" not in session):
+            flash("Please login to add a new category.")
+            return redirect(url_for("login"))
         return render("new-category.html")
 
     if(request.method == "POST"):
-        return redirect(url_for("home"))
+        print request.form
+        if("u-cookie" not in session):
+            print "NMo session"
+            flash("Please login to add a new category.")
+            return redirect(url_for("login"))
+        else:
+            print "u-cookie present"
+        category_name = request.form["category_name"]
+        category_description = request.form["category_description"]
+        category = None
+        print "Before category_name"
+        if(category_name):
+            print category_name
+            try:
+                category = utils.createCategory(
+                    name=category_name,
+                    description=category_description,
+                    user_id=session["u-cookie"].split("|")[1]
+                )
+            except Exception as inst:
+                print inst
+                flash("Something went wrong. Unable to add category.")
+            if(category is None):
+                return render(
+                    "new-category.html", category_name=category_name,
+                    category_description=category_description
+                )
+            else:
+                flash("New category added: %s" % category.name)
+                return redirect(url_for("newItem", category_id=category.id))
+        else:
+            flash("Please at least provide name for the category.")
+            return redirect(url_for("newCategory"))
 
 
 @app.route("/categories/<int:category_id>/edit", methods=["GET", "POST"])
@@ -119,8 +186,9 @@ def deleteCategory(category_id):
 
 
 @app.route("/items/new", methods=["GET", "POST"])
-def newItem(category_id):
+def newItem():
     if(request.method == "GET"):
+        print request.args
         # Categories are already passed in by default.
         return render("new-item.html")
 
