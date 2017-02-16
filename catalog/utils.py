@@ -57,8 +57,10 @@ def createUser(**params):
     try:
         session.add(new_user)
         session.commit()
-    except(Exception):
+    except Exception as inst:
         new_user = None
+        session.rollback()
+        print inst
     return new_user
 
 
