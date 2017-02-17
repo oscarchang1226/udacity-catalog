@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 
 from database import Base, User, Category, Item
@@ -97,6 +97,13 @@ def getCategories():
     return session.query(Category).all()
 
 
+def categoryNameExist(name):
+    """Return boolean for if category has this name."""
+    n = session.query(Category).filter(
+        func.lower(Category.name) == func.lower(name)).count()
+    return n > 0
+
+
 def createCategory(**params):
     """
     Creates a category and returns it
@@ -153,6 +160,13 @@ def deleteCategory(id):
         session.commit()
     except(Exception):
         session.rollback()
+
+
+def itemNameExist(name, category_id):
+    n = session.query(Item).filter_by(category_id=category_id).filter(
+        func.lower(Item.name) == func.lower(name)
+    ).count()
+    return n > 0
 
 
 def createItem(**params):

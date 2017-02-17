@@ -118,9 +118,15 @@ def logout():
 
 @app.route("/categories/<int:category_id>/items")
 def showCategoryItems(category_id):
-    return render(
-        "category-items.html", category=category, items=items
-    )
+    category = utils.getCategoryById(category_id)
+    if(category):
+        items = utils.getItemsByCategoryId(category_id)
+        return render(
+            "category-items.html", category=category, items=items
+        )
+    else:
+        flash("Specified category not found.")
+        return redirect(url_for("home"))
 
 
 @app.route("/categories/new", methods=["GET", "POST"])
@@ -132,33 +138,35 @@ def newCategory():
         return render("new-category.html")
 
     if(request.method == "POST"):
-        print request.form
         if("u-cookie" not in session):
-            print "NMo session"
             flash("Please login to add a new category.")
             return redirect(url_for("login"))
-        else:
-            print "u-cookie present"
-        category_name = request.form["category_name"]
-        category_description = request.form["category_description"]
-        category = None
-        print "Before category_name"
-        if(category_name):
-            print category_name
+        params = dict()
+        if("category_name" in request.form):
+            params["category_name"] = request.form["category_name"]
+        if("category_description" in request.form):
+            params["category_description"] = request.form[
+                                                "category_description"
+                                            ]
+        if("category_name" in params):
+            categoryNameExist = utils.categoryNameExist(
+                params["category_name"])
+            if(categoryNameExist):
+                flash("Category with the same name found. Click <a href=\"%s\">here</a>" % url_for("newItem"))  # NOQA
+                return redirect(url_for("newCategory"))
+            category_params = dict(
+                name=params["category_name"],
+                user_id=session["u-cookie"].split("|")[1]
+            )
+            category = None
+            if("category_description" in params):
+                category_params["description"] = params["category_description"]
             try:
-                category = utils.createCategory(
-                    name=category_name,
-                    description=category_description,
-                    user_id=session["u-cookie"].split("|")[1]
-                )
+                category = utils.createCategory(**category_params)
             except Exception as inst:
-                print inst
                 flash("Something went wrong. Unable to add category.")
             if(category is None):
-                return render(
-                    "new-category.html", category_name=category_name,
-                    category_description=category_description
-                )
+                return render("new-category.html", **params)
             else:
                 flash("New category added: %s" % category.name)
                 return redirect(url_for("newItem", category_id=category.id))
@@ -170,7 +178,10 @@ def newCategory():
 @app.route("/categories/<int:category_id>/edit", methods=["GET", "POST"])
 def editCategory(category_id):
     if(request.method == "GET"):
-        return render("edit-category.html", category=category)
+        return render(
+            "edit-category.html",
+            category=utils.getCategoryById(category_id)
+        )
 
     if(request.method == "POST"):
         return redirect(url_for("home"))
@@ -179,7 +190,7 @@ def editCategory(category_id):
 @app.route("/categories/<int:category_id>/delete", methods=["GET", "POST"])
 def deleteCategory(category_id):
     if(request.method == "GET"):
-        return render("delete-category.html", categor=category)
+        return render("delete-category.html", category=category)
 
     if(request.method == "POST"):
         return redirect(url_for("home"))
@@ -188,12 +199,52 @@ def deleteCategory(category_id):
 @app.route("/items/new", methods=["GET", "POST"])
 def newItem():
     if(request.method == "GET"):
-        print request.args
+        if("u-cookie" not in session):
+            flash("Please login to add a new item.")
+            return redirect(url_for("login"))
+        params = dict()
+        if("category_id" in request.args):
+            params["category_id"] = int(request.args["category_id"])
         # Categories are already passed in by default.
-        return render("new-item.html")
+        return render("new-item.html", **params)
 
     if(request.method == "POST"):
-        return redirect(url_for("home"))
+        if("u-cookie" not in session):
+            flash("Please login to add a new item.")
+            return redirect(url_for("login"))
+        params = dict()
+        if("item_name" in request.form):
+            params["item_name"] = request.form["item_name"]
+        if("item_description" in request.form):
+            params["item_description"] = request.form["item_description"]
+        if("item_category_id" in request.form):
+            params["category_id"] = request.form["item_category_id"]
+        if("item_name" in params and "category_id" in params):
+            item_params = dict(
+                name=params["item_name"],
+                category_id=params["category_id"],
+                user_id=session["u-cookie"].split("|")[1]
+            )
+            if("item_description" in params):
+                item_params["description"] = params["item_description"]
+            new_item = None
+            try:
+                new_item = utils.createItem(**item_params)
+            except Exception as inst:
+                flash("Unable to add new item.")
+            if(new_item is not None):
+                flash("New item added to %s: %s" % (
+                    new_item.category.name,
+                    new_item.name
+                ))
+                return redirect(url_for(
+                    "showCategoryItems",
+                    category_id=new_item.category_id
+                ))
+            return render("new-item.html", **params)
+        else:
+            flash("Both item name and item category is required.")
+            return render("new-item.html", **params)
 
 
 @app.route("/items/<int:item_id>/edit", methods=["GET", "POST"])

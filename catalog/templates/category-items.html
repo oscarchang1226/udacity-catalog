@@ -1,6 +1,8 @@
 {% extends "main.html" %}
 {% block content %}
-    <span>{{category.name}} Items</span>
+    <a href="{{url_for('editCategory', category_id=category.id)}}">Edit Category</a>
+    <a href="{{url_for('deleteCategory', category_id=category.id)}}">Delete Category</a>
+    <span>{{category.name}} Items ({{items|length}})</span>
     <ul>
         {% for item in items %}
             <li>{{item.name}}</li>

@@ -1,6 +1,6 @@
 {% extends "main.html" %}
 {% block content %}
-<form method="POST" action="#">
+<form method="POST" action="{{url_for('newItem')}}">
     <span>New Item</span>
     <label>
         <span>Name</span>
@@ -13,7 +13,11 @@
     <select name="item_category_id">
         <option value="">Select Category</option>
         {% for category in categories %}
-            <option value="{{category.id}}">{{category.name}}</option>
+            <option value="{{category.id}}"
+            {% if category_id and category_id == category.id %}
+                selected
+            {% endif %}
+                >{{category.name}}</option>
         {% endfor %}
     </select>
     <input type="submit"/>
