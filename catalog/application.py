@@ -8,14 +8,18 @@ from dummy import items, item, categories, category
 def render(template, **params):
     params["categories"] = utils.getCategories()
     if("u-cookie" in session and session["u-cookie"]):
-        uid = session["u-cookie"].split("|")[1]
-        h = session["u-cookie"].split("|")[0]
-        u = utils.getUserById(uid)
-        if(u.hash == h):
+        u = utils.checkIfUCookie(session["u-cookie"])
+        if(u):
             params["user"] = u
         else:
             session.pop("u-cookie", None)
     return render_template(template, **params)
+
+
+def needToLogin(message):
+    if("u-cookie" not in session):
+        flash(message)
+        return redirect(url_for("login"))
 
 
 app = Flask(__name__)
@@ -34,40 +38,21 @@ def register():
         return render("register.html")
 
     if(request.method == "POST"):
-        if(request.form["email"] and request.form["password"] and
-           request.form["confirm"]):
-            register = True
-            if(not utils.emailIsValid(request.form["email"])):
-                flash("Please enter valid email.")
-                register = False
-            if(not utils.passwordIsValid(request.form["password"])):
-                flash("Please enter valid password. 3-20 alphanumeric characters.")  # NOQA
-                register = False
-            if(request.form["password"] != request.form["confirm"]):
-                flash("Password not matched.")
-                register = False
-            if(utils.getUserByEmail(request.form["email"]) is not None):
-                flash("Email has been registered.")
-                register = False
+        messages = utils.validateFormForCreateUser(request.form)
+        if(len(messages) == 0):
+            user_params = utils.initializeUser(request.form)
+            user = utils.createUser(**user_params)
+            if(user is None):
+                flash("Failed to register user")
+                return render("register.html")
 
-            if(register):
-                salt = utils.generateRandomString()
-                user = utils.createUser(
-                    email=request.form["email"],
-                    salt=salt,
-                    hash=utils.generateHash(request.form["password"], salt)
-                )
-                if(user is None):
-                    flash("Failed to register user")
-                    return render("register.html")
-
-                flash("Your account is registered!")
-                session["u-cookie"] = "%s|%s" % (user.hash, user.id)
-                return redirect(url_for("home"))
-            else:
-                return render("register.html", email=request.form["email"])
+            flash("Your account is registered!")
+            session["u-cookie"] = "%s|%s" % (user.hash, user.id)
+            return redirect(url_for("home"))
         else:
-            return render("register.html")
+            for m in messages:
+                flash(m)
+            return render("register.html", email=request.form["email"])
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -81,13 +66,12 @@ def login():
     if(request.method == "POST"):
         email = request.form["email"]
         password = request.form["password"]
+        required = ["email", "password"]
         if(email and utils.emailIsValid(email)):
             user = utils.getUserByEmail(email)
             if(user and password):
-                print request.form
                 try:
-                    hash = utils.generateHash(str(password), str(user.salt))
-                    credentials = hash == user.hash
+                    credentials = utils.checkUserCredentials(email, password)
                     if(credentials):
                         session["u-cookie"] = "%s|%s" % (user.hash, user.id)
                         return redirect(url_for("home"))
@@ -142,12 +126,7 @@ def newCategory():
             flash("Please login to add a new category.")
             return redirect(url_for("login"))
         params = dict()
-        if("category_name" in request.form):
-            params["category_name"] = request.form["category_name"]
-        if("category_description" in request.form):
-            params["category_description"] = request.form[
-                                                "category_description"
-                                            ]
+        test = {k: str(v) for k, v in request.form.iteritems()}
         if("category_name" in params):
             categoryNameExist = utils.categoryNameExist(
                 params["category_name"])
@@ -172,7 +151,7 @@ def newCategory():
                 return redirect(url_for("newItem", category_id=category.id))
         else:
             flash("Please at least provide name for the category.")
-            return redirect(url_for("newCategory"))
+            return render("new-category.html", **test)
 
 
 @app.route("/categories/<int:category_id>/edit", methods=["GET", "POST"])

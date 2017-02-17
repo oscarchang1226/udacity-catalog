@@ -7,6 +7,7 @@ import string
 import random
 import hmac
 import re
+import bleach
 
 PASSWORD_RE = re.compile(r"^[a-zA-Z0-9].{3,20}$")
 EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
@@ -98,10 +99,13 @@ def getCategories():
 
 
 def categoryNameExist(name):
-    """Return boolean for if category has this name."""
-    n = session.query(Category).filter(
-        func.lower(Category.name) == func.lower(name)).count()
-    return n > 0
+    """
+    Check if category name already exist.
+    If an item is found, return the item, None otherwise.
+    """
+    category = session.query(Category).filter(
+        func.lower(Category.name) == func.lower(name)).one_or_none()
+    return category
 
 
 def createCategory(**params):
@@ -163,10 +167,14 @@ def deleteCategory(id):
 
 
 def itemNameExist(name, category_id):
-    n = session.query(Item).filter_by(category_id=category_id).filter(
+    """
+    Check if item name exist in a category.
+    Return the item if an item is found, None otherwise.
+    """
+    item = session.query(Item).filter_by(category_id=category_id).filter(
         func.lower(Item.name) == func.lower(name)
-    ).count()
-    return n > 0
+    ).one_or_none()
+    return item
 
 
 def createItem(**params):
@@ -216,6 +224,10 @@ def getItemById(id):
 
 
 def editItem(id, **params):
+    """
+    Edit an item and return item.
+    Return None when exception caught
+    """
     item = getItemById(id)
     if("name" in params):
         item.name = params["name"]
@@ -231,9 +243,120 @@ def editItem(id, **params):
 
 
 def deleteItem(id):
+    """Delete an item with the given id."""
     delete_item = getItemById(id)
     try:
         session.delete(delete_item)
         session.commit()
     except Exception:
         session.rollback()
+
+
+def sanitize(text):
+    """Sanitize input by striping white spaces and using bleach"""
+    try:
+        text = text.strip()
+        text = bleach.clean(text)
+    except Exception:
+        pass
+    return text
+
+
+def checkUserCredentials(e, p):
+    """
+    Check if user credentials are correct.
+    Return user if correct, None otherwise.
+    """
+    user = getUserByEmail(e)
+    try:
+        hash = generateHash(str(p), str(user.salt))
+        if(hash == user.hash):
+            return user
+    except Exception:
+        pass
+    return None
+
+
+def checkIfUCookie(u):
+    """
+    Check if session u-cookie matches user.
+    Return user if so, None otherwise.
+    """
+    uid = u.split("|")[1]
+    user = getUserById(uid)
+    try:
+        hash = u.split("|")[0]
+        if(hash == user.hash):
+            return user
+    except Exception:
+        pass
+    return None
+
+
+def validateFormForCreateUser(form):
+    """
+    Validate create user form.
+    Return error messages as array
+    """
+    messages = []
+    if(getUserByEmail(form["email"]) is not None):
+        messages.append("Email has been registered.")
+    else:
+        if(not emailIsValid(form["email"])):
+            messages.append("Please enter valid email.")
+        if(not passwordIsValid(form["password"])):
+            messages.append(
+                "Please enter valid password. 3-20 alphanumeric characters."
+            )
+        if(form["password"] != form["confirm"]):
+            messages.append("Password not matched.")
+    return messages
+
+
+def initializeUser(form):
+    """Sanitize and return parameters for a user"""
+    try:
+        salt = generateRandomString()
+        params = dict(
+            email=sanitize(form["email"]),
+            salt=salt,
+            hash=generateHash(sanitize(form["password"]), salt)
+        )
+        if form["name"]:
+            params["name"] = sanitize(form["name"])
+        if "img_url" in form and form["img_url"]:
+            params["img_url"] = sanitize(form["img_url"])
+        return params
+    except Exception as inst:
+        pass
+
+
+def initializeCategory(form):
+    """Sanitize and return parameters for a category"""
+    params = dict(
+        name=sanitize(form["name"]),
+        user_id=form["user_id"]
+    )
+    if form["description"]:
+        params["description"] = sanitize(form["description"])
+    return params
+
+
+def initializeItem(form):
+    """Sanitize and returns parameters for an item"""
+    params = dict(
+        name=sanitize(form["name"]),
+        user_id=form["user_id"],
+        category_id=form["category_id"]
+    )
+    if form["description"]:
+        params["description"] = sanitize(form["description"])
+    return params
+
+
+def checkForRequiredField(form, *fields):
+    """Check if all required fields are available"""
+    for f in fields:
+        if(len(form[f].strip()) == 0):
+            return False
+    return True
