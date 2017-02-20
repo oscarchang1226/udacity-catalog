@@ -4,10 +4,12 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0"  />
         <title>Item Catalog</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='bootstrap.min.css')}}">
+        <link rel="stylesheet" href="{{url_for('static', filename='bootstrap-theme.min.css')}}">
     </head>
     <body>
         <nav>
-            <a href="{{url_for('home')}}">Home</a>
+            <a class="btn btn-primary" href="{{url_for('home')}}">Home</a>
             {% for category in categories %}
                 <a href="{{url_for('showCategoryItems', category_id=category.id)}}">{{category.name}}</a>
             {% endfor %}
@@ -38,5 +40,8 @@
             {% block content %}
             {% endblock %}
         </div>
+
+        <script type="text/javascript" src="{{url_for('static', filename='jquery.min.js')}}"></script>
+        <script type="text/javascript" src="{{url_for('static', filename='bootstrap.min.js')}}"></script>
     </body>
 </html>
