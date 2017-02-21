@@ -1,6 +1,18 @@
 * {
     box-sizing: border-box;
 }
+body {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
+    flex-wrap: wrap;
+    width: 100%;
+}
+header {
+    width: 100%;
+    height: 48px;
+}
 header div.display {
     display: flex;
     height: 48px;
@@ -74,4 +86,38 @@ header form button {
     background: none;
     border: none;
     padding-left: 0;
+}
+nav {
+    display: flex;
+    flex-direction: column;
+    font-size: 18px;
+    height: calc(100% - 48px);
+    width: 50%;
+    border-right: 1px solid rgba(0,0,0,.4);
+    box-shadow: 2px 0px 4px rgba(0,0,0,.4);
+    padding: 0;
+    transform: translate(-110%, 0px);
+    transition: all .4s ease-in-out;
+}
+nav.show-filter {
+    transform: translate(0px, 0px);
+}
+nav a {
+    height: 40px;
+    padding: 7px 0 7px 8px;
+    width:100%;
+}
+nav a:hover {
+    text-decoration: none;
+    box-shadow: 0px 0px 8px;
+}
+nav a.selected {
+    background: #3F51B5;
+    color: #fff;
+}
+nav a.selected::after {
+    font-family: "Material Icons";
+    content: "chevron_left";
+    position: absolute;
+    margin-left: 4px;
 }

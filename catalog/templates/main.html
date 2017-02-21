@@ -15,7 +15,7 @@
     <body>
         <header>
             <div class="display">
-                <button type="button" class="icon-button" name="filter" aria-label="filters">
+                <button type="button" class="icon-button filter-button" name="filter" aria-label="filters">
                     <i class="material-icons md-36">filter_list</i>
                 </button>
                 <h1>Item Catalog</h1>
@@ -48,9 +48,9 @@
             </div>
         </header>
         <nav>
-            <a href="{{url_for('home')}}">All</a>
-            {% for category in categories %}
-                <a href="{{url_for('showCategoryItems', category_id=category.id)}}">{{category.name}}</a>
+            <a href="{{url_for('home')}}" class="category-button {% if not category %} selected {% endif %}">All</a>
+            {% for c in categories %}
+                <a href="{{url_for('showCategoryItems', category_id=c.id)}}" class="category-button {% if category and category.id == c.id %} selected {% endif %}">{{c.name}}</a>
             {% endfor %}
         </nav>
         <div class="container">
