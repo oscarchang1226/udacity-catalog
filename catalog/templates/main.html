@@ -53,7 +53,7 @@
                 <a href="{{url_for('showCategoryItems', category_id=c.id)}}" class="category-button {% if category and category.id == c.id %} selected {% endif %}">{{c.name}}</a>
             {% endfor %}
         </nav>
-        <div class="container">
+        <main>
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
                     <ul class="flash_messages">
@@ -65,7 +65,7 @@
             {% endwith %}
             {% block content %}
             {% endblock %}
-        </div>
+        </main>
 
         <script type="text/javascript" src="{{url_for('static', filename='jquery.min.js')}}"></script>
         <script type="text/javascript" src="{{url_for('static', filename='bootstrap.min.js')}}"></script>

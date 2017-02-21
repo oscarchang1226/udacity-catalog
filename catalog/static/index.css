@@ -35,6 +35,11 @@ header button.icon-button {
     background-color: inherit;
     margin-top: auto;
     margin-bottom: auto;
+    border-radius: 50%;
+}
+header button.icon-button:hover {
+    background-color: rgba(63, 81, 181, 1);
+    color: #fff;
 }
 header div.options {
     transform: translate(0, -180px);
@@ -98,9 +103,15 @@ nav {
     padding: 0;
     transform: translate(-110%, 0px);
     transition: all .4s ease-in-out;
+    position: absolute;
+    margin-top: 48px;
+    z-index: 2;
+    background-color: rgba(255, 255, 255, 1);
+    opacity: 0;
 }
 nav.show-filter {
     transform: translate(0px, 0px);
+    opacity: 1;
 }
 nav a {
     height: 40px;
@@ -120,4 +131,81 @@ nav a.selected::after {
     content: "chevron_left";
     position: absolute;
     margin-left: 4px;
+}
+main {
+    width: 100%;
+    height: calc(100% - 48px);
+}
+form {
+    margin: 8px;
+    width:calc(100% - 16px);
+}
+textarea {
+    resize: vertical;
+}
+a.item-header-button {
+    width: 28px;
+    height: 28px;
+    padding: 2px;
+    margin-left: 16px;
+}
+a.item-header-button i {
+    width: 24px;
+}
+.card-header button {
+    width: 40px;
+    margin-left: 4px;
+}
+div.no-item-found h5 {
+    text-align: center;
+}
+div.category-item-header {
+    display:flex;
+    padding-left: 4px;
+}
+div.category-item-header h4{
+    flex: 1;
+}
+div.category-item-header a {
+    margin: auto 4px;
+}
+/* Bootstrap components */
+.card {
+    position: relative;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    background-color: #fff;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+}
+.card-header:first-child {
+    border-radius: calc(.25rem - 1px) calc(.25rem - 1px) 0 0;
+}
+.card-header {
+    padding: .75rem 1.25rem;
+    margin-bottom: 0;
+    background-color: #f7f7f9;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    display: flex;
+}
+.card-block {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 auto;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    padding: 1.25rem;
+}
+.mb-0 {
+    margin-bottom: 0!important;
+    flex: 1;
+}
+.h5, h5 {
+    font-size: 1.25em;
 }

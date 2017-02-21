@@ -215,7 +215,7 @@ def getItemsByCategoryId(category_id):
     """Return items under given category"""
     return session.query(Item).filter_by(
         category_id=category_id
-    ).all()
+    ).order_by(Item.name).all()
 
 
 def getItemsByUserId(user_id):

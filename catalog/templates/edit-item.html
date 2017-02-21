@@ -2,8 +2,29 @@
 {% block content %}
 <form method="POST" action="{{url_for('editItem', item_id=item.id)}}">
     <input type="hidden" name="user_id" value="{{user.id}}">
-    <span>Edit item</span>
-    <label>
+    <h4>Edit item</h4>
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" name="name" value="{{item.name}}" class="form-control"/>
+    </div>
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea name="description" class="form-control">{{item.description}}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="category_id">Category</label>
+        <select name="category_id" class="form-control">
+            <option value="">Select Category</option>
+            {% for category in categories %}
+                <option value="{{category.id}}"
+                    {% if item.category_id == category.id %}
+                        selected
+                    {% endif %}
+                    >{{category.name}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <!-- <label>
         <span>Name</span>
         <input type="text" name="name" value="{{item.name}}"/>
     </label>
@@ -20,7 +41,8 @@
                 {% endif %}
                 >{{category.name}}</option>
         {% endfor %}
-    </select>
-    <input type="submit"/>
+    </select> -->
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a href="{{url_for('showCategoryItems', category_id=item.category_id)}}" class="btn">Cancel</a>
 </form>
 {% endblock %}

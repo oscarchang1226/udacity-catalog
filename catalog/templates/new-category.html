@@ -2,15 +2,15 @@
 {% block content %}
 <form method="POST" action="{{url_for('newCategory')}}">
     <input type="hidden" name="user_id" value="{{user.id}}">
-    <span>New Category</span>
-    <label>
-        <span>Name</span>
-        <input type="text" name="name" value="{{name}}"/>
-    </label>
-    <label>
-        <span>Description</span>
-        <textarea name="description">{{description}}</textarea>
-    </label>
-    <input type="submit"/>
+    <h4>New Category</h4>
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" name="name" value="{{name}}" class="form-control" required/>
+    </div>
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea name="description" class="form-control">{{description}}</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 {% endblock %}

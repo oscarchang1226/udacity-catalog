@@ -1,0 +1,37 @@
+{% if items|length > 0 %}
+<div id="accordian" role="tablist" aria-multiselectable="false">
+    {% for item in items %}
+    <div class="card">
+        <div class="card-header" role="tab" id="heading{{item.id}}">
+            <h5 class="mb-0">
+                <a data-toggle="collapse" data-parent="#accordian" href="#collapse{{item.id}}" aria-expanded="{% if loop.index == 1 %}true{% else %}false{% endif %}" aria-controls="collapse{{item.id}}">
+                    {{item.name}}
+                </a>
+            </h5>
+            {% if user and user.id == item.user_id %}
+                <a class="item-header-button" href="{{url_for('editItem', item_id=item.id)}}"><i class="material-icons">edit_mode</i></a>
+                <a class="item-header-button" href="{{url_for('deleteItem', item_id=item.id)}}"><i class="material-icons">delete</i></a>
+            {% endif %}
+        </div>
+
+        <div id="collapse{{item.id}}" class="collapse{% if loop.index == 1 %} in{% endif %}" role="tabpanel" aria-labelledby="heading{{item.id}}">
+            <div class="card-block">
+                {% if item.description %}
+                    {{item.description}}
+                {% else %}
+                    No description.
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="no-item-found">
+    {% if category %}
+        <h5>No items found. Add an item <a href="{{url_for('newItem', category_id=category.id)}}">here</a>.</h5>
+    {% else %}
+        <h5>No items found. Add an item <a href="{{url_for('newItem')}}">here</a>.</h5>
+    {% endif %}
+</div>
+{% endif %}
