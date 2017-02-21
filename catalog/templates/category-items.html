@@ -1,11 +1,25 @@
 {% extends "main.html" %}
 {% block content %}
-    <a href="{{url_for('editCategory', category_id=category.id)}}">Edit Category</a>
-    <a href="{{url_for('deleteCategory', category_id=category.id)}}">Delete Category</a>
+{% if category.user_id == user.id %}
+    <div>
+        <a href="{{url_for('editCategory', category_id=category.id)}}">Edit Category</a>
+        <a href="{{url_for('deleteCategory', category_id=category.id)}}">Delete Category</a>
+    </div>
+{% endif %}
     <span>{{category.name}} Items ({{items|length}})</span>
     <ul>
         {% for item in items %}
-            <li>{{item.name}}</li>
+            {% if user and item.user_id == user.id %}
+                <li>
+                    <div class="">
+                        <span>{{item.name}}</span>
+                        <a href="{{url_for('editItem', item_id=item.id)}}">Edit</a>
+                        <a href="{{url_for('deleteItem', item_id=item.id)}}">Delete</a>
+                    </div>
+                </li>
+            {% else %}
+                <li>{{item.name}}</li>
+            {% endif %}
         {% endfor %}
     </ul>
 {% endblock %}

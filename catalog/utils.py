@@ -103,8 +103,12 @@ def categoryNameExist(name):
     Check if category name already exist.
     If an item is found, return the item, None otherwise.
     """
-    category = session.query(Category).filter(
-        func.lower(Category.name) == func.lower(name)).one_or_none()
+    category = None
+    try:
+        category = session.query(Category).filter(
+            func.lower(Category.name) == func.lower(sanitize(name))).one()
+    except Exception:
+        return None
     return category
 
 
@@ -171,9 +175,13 @@ def itemNameExist(name, category_id):
     Check if item name exist in a category.
     Return the item if an item is found, None otherwise.
     """
-    item = session.query(Item).filter_by(category_id=category_id).filter(
-        func.lower(Item.name) == func.lower(name)
-    ).one_or_none()
+    item = None
+    try:
+        item = session.query(Item).filter_by(category_id=category_id).filter(
+            func.lower(Item.name) == func.lower(name)
+        ).one()
+    except Exception:
+        return None
     return item
 
 
@@ -335,7 +343,7 @@ def initializeCategory(form):
     """Sanitize and return parameters for a category"""
     params = dict(
         name=sanitize(form["name"]),
-        user_id=form["user_id"]
+        user_id=sanitize(form["user_id"])
     )
     if form["description"]:
         params["description"] = sanitize(form["description"])
@@ -346,8 +354,8 @@ def initializeItem(form):
     """Sanitize and returns parameters for an item"""
     params = dict(
         name=sanitize(form["name"]),
-        user_id=form["user_id"],
-        category_id=form["category_id"]
+        user_id=sanitize(form["user_id"]),
+        category_id=sanitize(form["category_id"])
     )
     if form["description"]:
         params["description"] = sanitize(form["description"])

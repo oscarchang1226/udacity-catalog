@@ -1,15 +1,17 @@
 {% extends "main.html" %}
 {% block content %}
-<form method="POST" action="#">
+<form method="POST" action="{{url_for('editCategory', category_id=category.id)}}">
+    <input type="hidden" name="user_id" value="{{user.id}}">
     <span>Edit Category</span>
     <label>
         <span>Name</span>
-        <input type="text" name="category_name" value="{{category.name}}"/>
+        <input type="text" name="name" value="{{category.name}}"/>
     </label>
     <label>
         <span>Description</span>
-        <textarea name="category_description">{{category.description}}</textarea>
+        <textarea name="description">{{category.description}}</textarea>
     </label>
     <input type="submit"/>
+    <a href="{{url_for('showCategoryItems', category_id=category.id)}}">Cancel</a>
 </form>
 {% endblock %}

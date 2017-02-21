@@ -1,6 +1,7 @@
 {% extends "main.html" %}
 {% block content %}
 <form method="POST" action="{{url_for('newCategory')}}">
+    <input type="hidden" name="user_id" value="{{user.id}}">
     <span>New Category</span>
     <label>
         <span>Name</span>

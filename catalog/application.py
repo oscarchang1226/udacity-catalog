@@ -16,10 +16,20 @@ def render(template, **params):
     return render_template(template, **params)
 
 
-def needToLogin(message):
+def needToLogin(message="Please log in to proceed."):
     if("u-cookie" not in session):
         flash(message)
         return redirect(url_for("login"))
+    else:
+        u = utils.checkIfUCookie(session["u-cookie"])
+        if(u is None):
+            flash(message)
+            return redirect(url_for("login"))
+
+
+def checkOwner(ownerId):
+    uid = int(session["u-cookie"].split("|")[1])
+    return ownerId == uid
 
 
 app = Flask(__name__)
@@ -64,14 +74,15 @@ def login():
         return render("login.html")
 
     if(request.method == "POST"):
-        email = request.form["email"]
-        password = request.form["password"]
         required = ["email", "password"]
-        if(email and utils.emailIsValid(email)):
-            user = utils.getUserByEmail(email)
-            if(user and password):
+        if(utils.checkForRequiredField(request.form, *required) and
+           utils.emailIsValid(request.form["email"])):
+            user = utils.getUserByEmail(request.form["email"])
+            if(user):
                 try:
-                    credentials = utils.checkUserCredentials(email, password)
+                    credentials = utils.checkUserCredentials(
+                        request.form["email"], request.form["password"]
+                    )
                     if(credentials):
                         session["u-cookie"] = "%s|%s" % (user.hash, user.id)
                         return redirect(url_for("home"))
@@ -79,16 +90,11 @@ def login():
                         flash("Credentials don't match. Please try again.")
                 except Exception as inst:
                     flash("Something went wrong")
-                    print inst
             else:
-                if(user):
-                    flash("Please enter login credentials.")
-                else:
-                    flash("Email is not registered.")
+                flash("Email is not registered.")
         else:
-            flash("Email is invalid. Please enter a valid email.")
-
-        return render("login.html", email=email)
+            flash("Please enter your login credentials.")
+        return render("login.html", email=request.form["email"])
 
 
 @app.route("/logout", methods=["POST"])
@@ -116,71 +122,116 @@ def showCategoryItems(category_id):
 @app.route("/categories/new", methods=["GET", "POST"])
 def newCategory():
     if(request.method == "GET"):
-        if("u-cookie" not in session):
-            flash("Please login to add a new category.")
-            return redirect(url_for("login"))
+        needToLogin("Please login to add a new category.")
         return render("new-category.html")
 
     if(request.method == "POST"):
-        if("u-cookie" not in session):
-            flash("Please login to add a new category.")
-            return redirect(url_for("login"))
-        params = dict()
-        test = {k: str(v) for k, v in request.form.iteritems()}
-        if("category_name" in params):
-            categoryNameExist = utils.categoryNameExist(
-                params["category_name"])
-            if(categoryNameExist):
-                flash("Category with the same name found. Click <a href=\"%s\">here</a>" % url_for("newItem"))  # NOQA
-                return redirect(url_for("newCategory"))
-            category_params = dict(
-                name=params["category_name"],
-                user_id=session["u-cookie"].split("|")[1]
-            )
-            category = None
-            if("category_description" in params):
-                category_params["description"] = params["category_description"]
-            try:
-                category = utils.createCategory(**category_params)
-            except Exception as inst:
-                flash("Something went wrong. Unable to add category.")
-            if(category is None):
-                return render("new-category.html", **params)
+        needToLogin("Please login to add a new category.")
+        required = ["name", "user_id"]
+        if(utils.checkForRequiredField(request.form, *required)):
+            category = utils.categoryNameExist(request.form["name"])
+            if(category is not None):
+                flash("Category already exist.")
             else:
-                flash("New category added: %s" % category.name)
-                return redirect(url_for("newItem", category_id=category.id))
+                category_params = utils.initializeCategory(request.form)
+                category = utils.createCategory(**category_params)
+                if(category is None):
+                    flash("Unable to add category.")
+                else:
+                    flash("New category added: %s" % category.name)
+                    return redirect(url_for(
+                        "showCategoryItems", category_id=category.id
+                    ))
         else:
-            flash("Please at least provide name for the category.")
-            return render("new-category.html", **test)
+            flash("Please provide the name of the category.")
+            return render(
+                "new-category.html",
+                description=request.form["description"]
+            )
+        return render("new-category.html")
 
 
 @app.route("/categories/<int:category_id>/edit", methods=["GET", "POST"])
 def editCategory(category_id):
     if(request.method == "GET"):
-        return render(
-            "edit-category.html",
-            category=utils.getCategoryById(category_id)
-        )
+        needToLogin("Please log in to edit a category.")
+        category = utils.getCategoryById(category_id)
+        if(checkOwner(category.user_id)):
+            return render(
+                "edit-category.html",
+                category=utils.getCategoryById(category_id)
+            )
+        else:
+            flash("Unable to edit category that is not created by you.")
+            return redirect(url_for(
+                "showCategoryItems", category_id=category.id))
 
     if(request.method == "POST"):
-        return redirect(url_for("home"))
+        needToLogin("Please log in to edit a category.")
+        category = utils.getCategoryById(category_id)
+        same_page_flag = True
+        if(checkOwner(category.user_id)):
+            required = ["name", "user_id"]
+            if(utils.checkForRequiredField(request.form, *required)):
+                category = utils.categoryNameExist(request.form["name"])
+                if(category is not None and category.id != category_id):
+                    flash("Category name already exist.")
+                else:
+                    same_page_flag = False
+                    category_params = utils.initializeCategory(request.form)
+                    category = utils.editCategory(
+                        category_id, **category_params)
+                    if(category is None):
+                        flash("Unable to edit category.")
+                    else:
+                        flash("Category %s edited!" % category.name)
+            else:
+                flash("Please provide the name of the category.")
+        else:
+            flash("Unable to edit category that is not created by you.")
+            same_page_flag = False
+
+        if(same_page_flag):
+            return render("edit-category.html",
+                          category=utils.getCategoryById(category_id))
+        else:
+            return redirect(url_for(
+                "showCategoryItems", category_id=category.id))
 
 
 @app.route("/categories/<int:category_id>/delete", methods=["GET", "POST"])
 def deleteCategory(category_id):
     if(request.method == "GET"):
-        return render("delete-category.html", category=category)
+        needToLogin("Please log in to delete a category.")
+        category = utils.getCategoryById(category_id)
+        if(checkOwner(category.user_id)):
+            return render("delete-category.html",
+                          category=category)
+        else:
+            flash("Unable to delete a category that is not created by you.")
+            return redirect(url_for(
+                "showCategoryItems", category_id=category.id))
 
     if(request.method == "POST"):
+        needToLogin("Please log in to delete a category.")
+        category = utils.getCategoryById(category_id)
+        if(checkOwner(category.user_id)):
+            items = utils.getItemsByCategoryId(category_id)
+            for item in items:
+                utils.deleteItem(item.id)
+            utils.deleteCategory(category_id)
+            flash("%s deleted along with %s items." % (
+                category.name, len(items)
+            ))
+        else:
+            flash("Unable to delete a category that is not created by you.")
         return redirect(url_for("home"))
 
 
 @app.route("/items/new", methods=["GET", "POST"])
 def newItem():
     if(request.method == "GET"):
-        if("u-cookie" not in session):
-            flash("Please login to add a new item.")
-            return redirect(url_for("login"))
+        needToLogin("Please log in to add an item.")
         params = dict()
         if("category_id" in request.args):
             params["category_id"] = int(request.args["category_id"])
@@ -188,59 +239,94 @@ def newItem():
         return render("new-item.html", **params)
 
     if(request.method == "POST"):
-        if("u-cookie" not in session):
-            flash("Please login to add a new item.")
-            return redirect(url_for("login"))
-        params = dict()
-        if("item_name" in request.form):
-            params["item_name"] = request.form["item_name"]
-        if("item_description" in request.form):
-            params["item_description"] = request.form["item_description"]
-        if("item_category_id" in request.form):
-            params["category_id"] = request.form["item_category_id"]
-        if("item_name" in params and "category_id" in params):
-            item_params = dict(
-                name=params["item_name"],
-                category_id=params["category_id"],
-                user_id=session["u-cookie"].split("|")[1]
-            )
-            if("item_description" in params):
-                item_params["description"] = params["item_description"]
-            new_item = None
-            try:
-                new_item = utils.createItem(**item_params)
-            except Exception as inst:
-                flash("Unable to add new item.")
-            if(new_item is not None):
-                flash("New item added to %s: %s" % (
-                    new_item.category.name,
-                    new_item.name
-                ))
-                return redirect(url_for(
-                    "showCategoryItems",
-                    category_id=new_item.category_id
-                ))
+        needToLogin("Please log in to add an item.")
+        required = ["name", "user_id", "category_id"]
+        same_page_flag = True
+        params = None
+        if(utils.checkForRequiredField(request.form, *required)):
+            if(utils.itemNameExist(request.form["name"],
+                                   request.form["category_id"])):
+                flash("Item with same name found in same category.")
+            else:
+                same_page_flag = False
+                item_params = utils.initializeItem(request.form)
+                item = utils.createItem(**item_params)
+                if(item is None):
+                    flash("Unable to add item.")
+                else:
+                    flash("New item added: %s." % item.name)
+        else:
+            flash("Please provide a name and category for the item.")
+        if(same_page_flag):
+            params = dict(request.form)
             return render("new-item.html", **params)
         else:
-            flash("Both item name and item category is required.")
-            return render("new-item.html", **params)
+            return redirect(url_for("home"))
 
 
 @app.route("/items/<int:item_id>/edit", methods=["GET", "POST"])
 def editItem(item_id):
     if(request.method == "GET"):
-        return render("edit-item.html", item=item)
+        needToLogin("Please log in to edit an item.")
+        item = utils.getItemById(item_id)
+        if(checkOwner(item.user_id)):
+            return render("edit-item.html", item=item)
+        else:
+            flash("Unable to edit item that is not created by you.")
+            return redirect(url_for("home"))
 
     if(request.method == "POST"):
-        return redirect(url_for("home"))
+        needToLogin("Please log in to edit an item.")
+        required = ["name", "user_id", "category_id"]
+        same_page_flag = True
+        params = None
+        item = utils.getItemById(item_id)
+        if(checkOwner(item.user_id)):
+            if(utils.checkForRequiredField(request.form, *required)):
+                e_item = utils.itemNameExist(
+                    request.form["name"],
+                    request.form["category_id"])
+
+                if(e_item and e_item.id != item_id):
+                    flash("Item name already exist.")
+                else:
+                    same_page_flag = False
+                    item_params = utils.initializeItem(request.form)
+                    item = utils.editItem(item_id, **item_params)
+                    if(item):
+                        flash("%s item edited." % item.name)
+                    else:
+                        flash("Unable to edit item.")
+            else:
+                flash("Please provide a name and category for the item.")
+        else:
+            flash("Unable to edit item that is not created by you.")
+            same_page_flag = False
+        if(same_page_flag):
+            return render("edit-item.html", item=item)
+        else:
+            return redirect(url_for("home"))
 
 
 @app.route("/items/<int:item_id>/delete", methods=["GET", "POST"])
 def deleteItem(item_id):
     if(request.method == "GET"):
-        return render("delete-item.html", item=item)
+        needToLogin("Please log in to delete an item.")
+        item = utils.getItemById(item_id)
+        if(checkOwner(item.user_id)):
+            return render("delete-item.html", item=item)
+        else:
+            flash("Unable to delete item that is not created by you.")
+            return redirect(url_for("home"))
 
     if(request.method == "POST"):
+        needToLogin("Please log in to delete an item.")
+        item = utils.getItemById(item_id)
+        if(checkOwner(item.user_id)):
+            utils.deleteItem(item_id)
+            flash("%s deleted." % item.name)
+        else:
+            flash("Unable to delete item that is not created by you.")
         return redirect(url_for("home"))
 
 

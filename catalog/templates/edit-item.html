@@ -1,16 +1,17 @@
 {% extends "main.html" %}
 {% block content %}
-<form method="POST" action="#">
+<form method="POST" action="{{url_for('editItem', item_id=item.id)}}">
+    <input type="hidden" name="user_id" value="{{user.id}}">
     <span>Edit item</span>
     <label>
         <span>Name</span>
-        <input type="text" name="item_name" value="{{item.name}}"/>
+        <input type="text" name="name" value="{{item.name}}"/>
     </label>
     <label>
         <span>Description</span>
-        <textarea name="item_description">{{item.description}}</textarea>
+        <textarea name="description">{{item.description}}</textarea>
     </label>
-    <select name="item_category_id">
+    <select name="category_id">
         <option value="">Select Category</option>
         {% for category in categories %}
             <option value="{{category.id}}"

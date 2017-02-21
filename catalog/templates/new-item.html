@@ -1,16 +1,17 @@
 {% extends "main.html" %}
 {% block content %}
 <form method="POST" action="{{url_for('newItem')}}">
+    <input type="hidden" name="user_id" value="{{user.id}}">
     <span>New Item</span>
     <label>
         <span>Name</span>
-        <input type="input" name="item_name"/>
+        <input type="input" name="name"/>
     </label>
     <label>
         <span>Description</span>
-        <textarea name="item_description"></textarea>
+        <textarea name="description"></textarea>
     </label>
-    <select name="item_category_id">
+    <select name="category_id">
         <option value="">Select Category</option>
         {% for category in categories %}
             <option value="{{category.id}}"
