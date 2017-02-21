@@ -6,26 +6,51 @@
         <title>Item Catalog</title>
         <link rel="stylesheet" href="{{url_for('static', filename='bootstrap.min.css')}}">
         <link rel="stylesheet" href="{{url_for('static', filename='bootstrap-theme.min.css')}}">
+        <link rel="stylesheet" href="{{url_for('static', filename='material-icons.css')}}">
+        <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}">
+        <link rel="stylesheet" href="{{url_for('static', filename='index-medium.css')}}" media="screen and (min-width:768px)">
+        <link rel="stylesheet" href="{{url_for('static', filename='index-large.css')}}" media="screen and (min-width:1024px)">
     </head>
     <body>
+        <header>
+            <div class="display">
+                <button type="button" class="icon-button" name="filter" aria-label="filters">
+                    <i class="material-icons md-36">filter_list</i>
+                </button>
+                <h1>Item Catalog</h1>
+                <button type="button" class="icon-button menu-button" name="menu" aria-label="menu">
+                    <i class="material-icons md-36">menu</i>
+                </button>
+            </div>
+            <div class="options">
+                <ul>
+                    {% if user %}
+                        <li>
+                            <span>Signed in as {% if user.name %}{{user.name}}{% else %}{{user.email}}{% endif %}</span>
+                        </li>
+                        <li>
+                            <a href="{{url_for('newCategory')}}">Add Category</a>
+                        </li>
+                        <li>
+                            <a href="{{url_for('newItem')}}">Add Item</a>
+                        </li>
+                        <li>
+                            <form action="{{url_for('logout')}}" method="POST">
+                                <button type="submit">Logout</button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li><a href="{{url_for('login')}}">Login</a></li>
+                        <li><a href="{{url_for('register')}}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </header>
         <nav>
-            <a class="btn btn-primary" href="{{url_for('home')}}">Home</a>
+            <a href="{{url_for('home')}}">All</a>
             {% for category in categories %}
                 <a href="{{url_for('showCategoryItems', category_id=category.id)}}">{{category.name}}</a>
             {% endfor %}
-            {% if user %}
-                <a href="{{url_for('newCategory')}}">Add Category</a>
-                {% if category %}
-                    <a href="{{url_for('newItem', category_id=category.id)}}">Add Item</a>
-                {% endif %}
-                <form class="user-logout" action="{{url_for('logout')}}" method="post">
-                    <span>{{user.email}}</span>
-                    <input type="submit" name="logout" value="Logout">
-                </form>
-            {% else %}
-                <a href="{{url_for('register')}}">Register</a>
-                <a href="{{url_for('login')}}">Login</a>
-            {% endif %}
         </nav>
         <div class="container">
             {% with messages = get_flashed_messages() %}
@@ -43,5 +68,6 @@
 
         <script type="text/javascript" src="{{url_for('static', filename='jquery.min.js')}}"></script>
         <script type="text/javascript" src="{{url_for('static', filename='bootstrap.min.js')}}"></script>
+        <script type="text/javascript" src="{{url_for('static', filename='app.js')}}"></script>
     </body>
 </html>

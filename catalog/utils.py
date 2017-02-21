@@ -95,7 +95,7 @@ def deleteUser(id):
 
 def getCategories():
     """Get all categories"""
-    return session.query(Category).all()
+    return session.query(Category).order_by(Category.name).all()
 
 
 def categoryNameExist(name):
@@ -206,9 +206,9 @@ def createItem(**params):
     return item
 
 
-def getItems(n=10):
-    """Return items ordered descending by created on"""
-    return session.query(Item).order_by(Item.created_on.desc()).limit(n).all()
+def getItems():
+    """Return items ordered by name"""
+    return session.query(Item).order_by(Item.name).all()
 
 
 def getItemsByCategoryId(category_id):

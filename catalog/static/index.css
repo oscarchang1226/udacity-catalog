@@ -1,0 +1,77 @@
+* {
+    box-sizing: border-box;
+}
+header div.display {
+    display: flex;
+    height: 48px;
+    width: 100%;
+    padding: 0 4px;
+    z-index: 3;
+    border-bottom: 2px solid rgba(0,0,0,.4);
+    background-color: white;
+}
+header h1 {
+    margin: auto 0;
+    padding-left: 8px;
+    flex: 1;
+}
+header button.icon-button {
+    width: 40px;
+    height: 40px;
+    padding: 2px;
+    border: none;
+    background-color: inherit;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+header div.options {
+    transform: translate(0, -180px);
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
+    background-color: white;
+    width: 100%;
+    box-shadow: 0 2px 2px 0px rgba(0,0,0,.4);
+    transition: all .4s ease-in-out;
+}
+header div.options.show-menu {
+    transform: translate(0, 0);
+    z-index: 2;
+    opacity: 1;
+}
+header ul {
+    font-size: 16px;
+    list-style-type: none;
+    padding: 8px 0px;
+    margin-bottom: 0;
+}
+header li {
+    height: 40px;
+    width: 100%;
+    padding-left: 16px;
+}
+header li:not(:last-child) {
+    height: 39px;
+    border-bottom: 1px solid rgba(0,0,0,.4);
+    cursor: pointer;
+}
+header li span, header li a {
+    width: 100%;
+    display: block;
+    height: 100%;
+    padding: 8px 0;
+    text-decoration: none;
+}
+header form {
+    margin: auto 0;
+    height: 100%;
+    width: 100%;
+}
+header form button {
+    height: 100%;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding-left: 0;
+}
