@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, jsonify
 from flask import url_for, flash, session, make_response
 
 import utils
-from dummy import items, item, categories, category
+# from dummy import items, item, categories, category
 
 
 def render(template, **params):
@@ -332,22 +332,26 @@ def deleteItem(item_id):
 
 @app.route("/api/categories")
 def categoriesApi():
-    return "categories in json"
+    categories = utils.getCategories()
+    return jsonify(categories=[c.serialize for c in categories])
 
 
 @app.route("/api/categories/<int:category_id>")
 def categoryApi(category_id):
-    return "category in json"
+    category = utils.getCategoryById(category_id)
+    return jsonify(category=category.serialize)
 
 
 @app.route("/api/categories/<int:category_id>/items")
 def categoryItems(category_id):
-    return "category items in json"
+    items = utils.getItemsByCategoryId(category_id)
+    return jsonify(items=[i.serialize for i in items])
 
 
 @app.route("/api/items/<int:item_id>")
 def itemApi(item_id):
-    return "item in json"
+    item = utils.getItemById(item_id)
+    return jsonify(item=item.serialize)
 
 
 if __name__ == "__main__":

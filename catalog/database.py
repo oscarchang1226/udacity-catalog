@@ -78,44 +78,6 @@ class Item(Base):
         }
 
 
-class CategoryVisit(Base):
-    __tablename__ = "category_visit"
-
-    id = Column(Integer, primary_key=True)
-    category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
-    category = relationship(Category)
-    visits = Column(Integer, server_default="1")
-
-    @property
-    def serialize(self):
-        """
-            Return object in JSON format
-        """
-        return {
-            "id": self.id,
-            "visits": self.visits
-        }
-
-
-class ItemVisit(Base):
-    __tablename__ = "item_visit"
-
-    id = Column(Integer, primary_key=True)
-    item_id = Column(Integer, ForeignKey("item.id"), nullable=False)
-    item = relationship(Item)
-    visits = Column(Integer, server_default="1")
-
-    @property
-    def serialize(self):
-        """
-            Return object in JSON format
-        """
-        return {
-            "id": self.id,
-            "visits": self.visits
-        }
-
-
 engine = create_engine("sqlite:///catalog.db")
 
 Base.metadata.create_all(engine)
