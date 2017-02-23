@@ -15,8 +15,11 @@ def render(template, **params):
         u = utils.checkIfUCookie(session["u-cookie"])
         if(u):
             params["user"] = u
+            if("other-acc" in session and session["other-acc"]):
+                params["other_acc"] = session["other-acc"]
         else:
             session.pop("u-cookie", None)
+            session.pop("other-acc", None)
     return render_template(template, **params)
 
 

@@ -30,7 +30,13 @@
                     </button>
                     <span class="show-x-lg">Signed in as {% if user.name %}{{user.name}}{% else %}{{user.email}}{% endif %}</span>
                     <form class="show-x-lg" action="{{url_for('logout')}}" method="POST">
-                        <button type="submit" class="btn btn-danger">Logout</button>
+                        <button type="submit"
+                            {% if other_acc %}
+                                {% if other_acc == "google"%}
+                                    onclick="signOut()"
+                                {% endif %}
+                            {% endif %}
+                            class="btn btn-danger">Logout</button>
                     </form>
                 {% else %}
                     <button type="button" class="btn btn-default show-x-lg">
@@ -54,7 +60,14 @@
                             </li>
                             <li>
                                 <form action="{{url_for('logout')}}" method="POST">
-                                    <button type="submit">Logout</button>
+                                    <div class="g-signin2" style="display: None"></div>
+                                    <button type="submit"
+                                        {% if other_acc %}
+                                            {% if other_acc == "google"%}
+                                                onclick="signOut()"
+                                            {% endif %}
+                                        {% endif %}
+                                    >Logout</button>
                                 </form>
                             </li>
                         {% else %}
