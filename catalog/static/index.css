@@ -27,6 +27,9 @@ header {
 .show-sm {
     display: block;
 }
+span.show-sm {
+    display: inline;
+}
 .show-md {
     display: none;
 }
@@ -35,6 +38,9 @@ header {
 }
 .show-x-lg {
     display:none;
+}
+.no-display {
+    display: none;
 }
 .display-only {
     cursor:auto !important;
@@ -220,6 +226,16 @@ div.category-item-header h4{
 }
 div.category-item-header a {
     margin: auto 4px;
+}
+div.sign-in-options {
+    margin: 32px 0px;
+    padding: 16px;
+    border-top: 1px solid rgba(0,0,0,.4);
+    text-align: center;
+}
+div.g-signin2 {
+    margin: auto;
+    width: 120px;
 }
 /* Bootstrap components */
 .card {

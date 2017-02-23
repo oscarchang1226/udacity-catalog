@@ -12,15 +12,6 @@ An application that provides a list of items within a variety of categories as w
 2.  Open Linux terminal and change directory to the project repository.
 3.  Enter command `vagrant up`.
 4.  Enter command `vagrant ssh`.
-5.  At this point, you are already in the Virtual Machine. Enter command `cd /vagrant/?`.
-
-## Checklist
-1. Mock-ups
-2. Routing
-3. Templates/Html
-4. CRUD Functionalities
-5. API End points
-6. Styling
-
-### Mock-ups
-[Mockup.pdf](/Mockup.pdf)
+5.  At this point, you are already in the Virtual Machine. Enter command `cd /vagrant/catalog`.
+6.  Run command `python application.py`.
+7.  Open a web browser and navigate to [http://localhost:5000](http://localhost:5000).

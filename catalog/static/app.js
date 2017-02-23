@@ -18,7 +18,6 @@ $("header h1").on("click", function() {
     $("nav").removeClass("show-filter");
 });
 
-
 function onSignIn(googleUser) {
     var profile = googleUser.getBasicProfile();
     var data = {

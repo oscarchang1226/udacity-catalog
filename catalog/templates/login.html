@@ -1,20 +1,23 @@
 {% extends "main.html" %}
 {% block content %}
-<form method="POST" action="{{url_for('login')}}">
-    <h4>Login</h4>
-    <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" name="email" class="form-control" required/>
-    </div>
-    <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" name="password" class="form-control" required/>
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-    <a href="{{url_for('home')}}">Cancel</a>
+<div class="main-form">
+    <form method="POST" action="{{url_for('login')}}">
+        <h4>Login</h4>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" name="email" class="form-control" required/>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" name="password" class="form-control" required/>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <a href="{{url_for('home')}}">Cancel</a>
+    </form>
     <div class="sign-in-options">
+        <p>Or Sign in with other accounts: </p>
         <div class="g-signin2" data-onsuccess="onSignIn"></div>
-        <a href="#" onclick="signOut()">Sign out</a>
+        <!-- <a href="#" onclick="signOut()">Sign out</a> -->
     </div>
-</form>
+</div>
 {% endblock %}

@@ -19,7 +19,8 @@ def render(template, **params):
                 params["other_acc"] = session["other-acc"]
         else:
             session.pop("u-cookie", None)
-            session.pop("other-acc", None)
+            if("other-acc" in session and session["other-acc"]):
+                session.pop("other-acc", None)
     return render_template(template, **params)
 
 
@@ -144,7 +145,8 @@ def logout():
         if("u-cookie" in session):
             flash("Logout Successful")
             session.pop("u-cookie")
-            session.pop("other-acc")
+            if("other-acc" in session):
+                session.pop("other-acc")
         return redirect(url_for("home"))
 
 

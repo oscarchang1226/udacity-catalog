@@ -9,6 +9,9 @@ body {
 .show-x-lg {
     display: block;
 }
+span.show-x-lg {
+    display: inline;
+}
 header div.options.show-menu {
     opacity: 0;
     transform: translate(0, -180px);

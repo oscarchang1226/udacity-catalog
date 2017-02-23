@@ -4,6 +4,9 @@
 .show-md {
     display: block;
 }
+span.show-md {
+    display: inline;
+}
 .show-lg {
     display: none;
 }
@@ -25,4 +28,10 @@ header div.options {
 }
 header div.options.show-menu {
     z-index: 3;
+}
+div.main-form {
+    width: 400px;
+    height: 500px;
+    margin: auto;
+    margin-top: 10%;
 }

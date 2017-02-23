@@ -7,3 +7,6 @@
 .show-lg {
     display: block;
 }
+span.show-lg {
+    display: inline;
+}

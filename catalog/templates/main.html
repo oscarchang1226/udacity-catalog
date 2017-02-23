@@ -60,7 +60,6 @@
                             </li>
                             <li>
                                 <form action="{{url_for('logout')}}" method="POST">
-                                    <div class="g-signin2" style="display: None"></div>
                                     <button type="submit"
                                         {% if other_acc %}
                                             {% if other_acc == "google"%}
@@ -105,10 +104,10 @@
             {% block content %}
             {% endblock %}
         </main>
-
+        <div class="g-signin2 no-display"></div>
         <script type="text/javascript" src="{{url_for('static', filename='jquery.min.js')}}"></script>
         <script type="text/javascript" src="{{url_for('static', filename='bootstrap.min.js')}}"></script>
-        <script type="text/javascript" src="{{url_for('static', filename='app.js')}}"></script>
-        <script src="https://apis.google.com/js/platform.js" async defer></script>
+        <script src="https://apis.google.com/js/client:platform.js?onload=googleOnload" async defer></script>
+        <script type="text/javascript" src="{{url_for('static', filename='app.js')}}" async defer></script>
     </body>
 </html>

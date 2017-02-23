@@ -1,8 +1,10 @@
 {% extends "main.html" %}
 {% block content %}
-<form method="POST" action="{{url_for('deleteCategory', category_id=category.id)}}">
-    <h4>Delete <strong>{{category.name}}</strong> category and items under this category?</h4>
-    <button type="submit" class="btn btn-danger">Delete</button>
-    <a href="{{url_for('showCategoryItems', category_id=category.id)}}">Cancel</a>
-</form>
+<div class="main-form">
+    <form method="POST" action="{{url_for('deleteCategory', category_id=category.id)}}">
+        <h4>Delete <strong>{{category.name}}</strong> category and items under this category?</h4>
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{{url_for('showCategoryItems', category_id=category.id)}}">Cancel</a>
+    </form>
+</div>
 {% endblock %}

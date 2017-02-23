@@ -8,4 +8,4 @@ def deleteAll():
     session.commit()
 
 
-deleteAll()
+# deleteAll()
