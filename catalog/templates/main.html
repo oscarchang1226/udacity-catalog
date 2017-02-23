@@ -3,32 +3,53 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0"  />
+        <meta name="google-signin-client_id" content="{{google_client_id}}">
         <title>Item Catalog</title>
         <link rel="stylesheet" href="{{url_for('static', filename='palette.css')}}">
         <link rel="stylesheet" href="{{url_for('static', filename='bootstrap.min.css')}}">
         <link rel="stylesheet" href="{{url_for('static', filename='bootstrap-theme.min.css')}}">
         <link rel="stylesheet" href="{{url_for('static', filename='material-icons.css')}}">
         <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}">
-        <link rel="stylesheet" href="{{url_for('static', filename='index-medium.css')}}" media="screen and (min-width:768px)">
-        <link rel="stylesheet" href="{{url_for('static', filename='index-large.css')}}" media="screen and (min-width:1024px)">
+        <link rel="stylesheet" href="{{url_for('static', filename='index-medium.css')}}" media="screen and (min-width:900px)">
+        <link rel="stylesheet" href="{{url_for('static', filename='index-large.css')}}" media="screen and (min-width:1100px)">
+        <link rel="stylesheet" href="{{url_for('static', filename='index-x-large.css')}}" media="screen and (min-width:1280px)">
     </head>
     <body>
         <header>
             <div class="display">
-                <button type="button" class="icon-button filter-button" name="filter" aria-label="filters">
-                    <i class="material-icons md-36">filter_list</i>
+                <button type="button" class="icon-button filter-button show-sm" name="filter" aria-label="filters">
+                    <i class="material-icons">filter_list</i>
                 </button>
                 <h1>Item Catalog</h1>
+                {% if user %}
+                    <button type="button" class="btn btn-default show-lg">
+                        <a class="show-lg" href="{{url_for('newCategory')}}">Add Category</a>
+                    </button>
+                    <button type="button" class="btn btn-default show-lg">
+                        <a class="show-lg" href="{{url_for('newItem')}}">Add Item</a>
+                    </button>
+                    <span class="show-x-lg">Signed in as {% if user.name %}{{user.name}}{% else %}{{user.email}}{% endif %}</span>
+                    <form class="show-x-lg" action="{{url_for('logout')}}" method="POST">
+                        <button type="submit" class="btn btn-danger">Logout</button>
+                    </form>
+                {% else %}
+                    <button type="button" class="btn btn-default show-x-lg">
+                        <a href="{{url_for('login')}}">Login</a>
+                    </button>
+                    <button type="button" class="btn btn-default show-x-lg">
+                        <a href="{{url_for('register')}}">Register</a>
+                    </button>
+                {% endif %}
                 <div class="options">
                     <ul>
                         {% if user %}
-                            <li>
+                            <li class="display-only">
                                 <span>Signed in as {% if user.name %}{{user.name}}{% else %}{{user.email}}{% endif %}</span>
                             </li>
-                            <li>
+                            <li class="show-sm show-md">
                                 <a href="{{url_for('newCategory')}}">Add Category</a>
                             </li>
-                            <li>
+                            <li class="show-sm show-md">
                                 <a href="{{url_for('newItem')}}">Add Item</a>
                             </li>
                             <li>
@@ -42,8 +63,8 @@
                         {% endif %}
                     </ul>
                 </div>
-                <button type="button" class="icon-button menu-button" name="menu" aria-label="menu">
-                    <i class="material-icons md-36">menu</i>
+                <button type="button" class="icon-button menu-button hide-x-lg" name="menu" aria-label="menu">
+                    <i class="material-icons">menu</i>
                 </button>
             </div>
         </header>
@@ -56,11 +77,16 @@
         <main>
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
-                    <ul class="flash_messages">
-                        {% for message in messages %}
-                            <li>{{message}}</li>
-                        {% endfor %}
-                    </ul>
+                <div class="flash-alerts">
+                    {% for message in messages %}
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            {{message}}
+                        </div>
+                    {% endfor %}
+                </div>
                 {% endif %}
             {% endwith %}
             {% block content %}
@@ -70,5 +96,6 @@
         <script type="text/javascript" src="{{url_for('static', filename='jquery.min.js')}}"></script>
         <script type="text/javascript" src="{{url_for('static', filename='bootstrap.min.js')}}"></script>
         <script type="text/javascript" src="{{url_for('static', filename='app.js')}}"></script>
+        <script src="https://apis.google.com/js/platform.js" async defer></script>
     </body>
 </html>

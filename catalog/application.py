@@ -2,11 +2,15 @@ from flask import Flask, render_template, request, redirect, jsonify
 from flask import url_for, flash, session, make_response
 
 import utils
+import google_utils
+
+import json
 # from dummy import items, item, categories, category
 
 
 def render(template, **params):
     params["categories"] = utils.getCategories()
+    params["google_client_id"] = google_utils.CLIENT_ID
     if("u-cookie" in session and session["u-cookie"]):
         u = utils.checkIfUCookie(session["u-cookie"])
         if(u):
@@ -97,12 +101,47 @@ def login():
         return render("login.html", email=request.form["email"])
 
 
+@app.route("/gconnect", methods=["POST"])
+def gconnect():
+    if(request.method == "POST"):
+        verified, u = google_utils.verify(request.form)
+        if(verified):
+            user = utils.getUserByEmail(u["email"])
+            salt = u["at_hash"]
+            hash = utils.generateHash(u["sub"], salt)
+            if(user):
+                user = utils.updateUserHash(user.id, salt, hash)
+                if(user):
+                    flash("Login Successful.")
+                    session["u-cookie"] = "%s|%s" % (user.hash, user.id)
+                    session["other-acc"] = "google"
+                else:
+                    flash("Failed to login with Google")
+            else:
+                u["salt"] = salt
+                u["password"] = u["sub"]
+                user_params = utils.initializeUser(u)
+                user = utils.createUser(**user_params)
+                if(user):
+                    flash("Login Successful.")
+                    session["u-cookie"] = "%s|%s" % (user.hash, user.id)
+                    session["other-acc"] = "google"
+                else:
+                    flash("Failed to login with Google")
+        else:
+            flash("Failed to login with Google.")
+        response = make_response(json.dumps(verified), 200)
+        response.headers["Content-Type"] = "application/json"
+        return response
+
+
 @app.route("/logout", methods=["POST"])
 def logout():
     if(request.method == "POST"):
         if("u-cookie" in session):
             flash("Logout Successful")
             session.pop("u-cookie")
+            session.pop("other-acc")
         return redirect(url_for("home"))
 
 

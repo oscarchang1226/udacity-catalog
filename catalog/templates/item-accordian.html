@@ -29,9 +29,9 @@
 {% else %}
 <div class="no-item-found">
     {% if category %}
-        <h5>No items found. Add an item <a href="{{url_for('newItem', category_id=category.id)}}">here</a>.</h5>
+        <h5>No items found. {% if user %}Add an item <a href="{{url_for('newItem', category_id=category.id)}}">here</a>.{% endif %}</h5>
     {% else %}
-        <h5>No items found. Add an item <a href="{{url_for('newItem')}}">here</a>.</h5>
+        <h5>No items found. {% if user %}Add an item <a href="{{url_for('newItem')}}">here</a>.{% endif %}</h5>
     {% endif %}
 </div>
 {% endif %}

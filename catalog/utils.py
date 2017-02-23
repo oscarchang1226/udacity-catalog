@@ -55,6 +55,8 @@ def createUser(**params):
     )
     if("name" in params):
         new_user.name = params["name"]
+    if("img_url" in params):
+        new_user.img_url = params["img_url"]
     try:
         session.add(new_user)
         session.commit()
@@ -83,6 +85,24 @@ def getUserById(id):
     Return none if not found.
     """
     return session.query(User).get(id)
+
+
+def updateUserHash(id, salt, hash):
+    """
+    Updates user salt and hash. (Used for social log in)
+    Returns user if success.
+    Return None otherwise.
+    """
+    user = getUserById(id)
+    user.salt = salt
+    user.hash = hash
+    try:
+        session.add(user)
+        session.commit()
+    except Exception:
+        session.rollback()
+        return None
+    return user
 
 
 def deleteUser(id):
@@ -325,6 +345,8 @@ def initializeUser(form):
     """Sanitize and return parameters for a user"""
     try:
         salt = generateRandomString()
+        if("salt" in form and form["salt"]):
+            salt = form["salt"]
         params = dict(
             email=sanitize(form["email"]),
             salt=salt,
@@ -332,11 +354,11 @@ def initializeUser(form):
         )
         if form["name"]:
             params["name"] = sanitize(form["name"])
-        if "img_url" in form and form["img_url"]:
+        if("img_url" in form and form["img_url"]):
             params["img_url"] = sanitize(form["img_url"])
         return params
     except Exception as inst:
-        pass
+        print inst
 
 
 def initializeCategory(form):

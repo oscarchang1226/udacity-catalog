@@ -1,11 +1,11 @@
 {% extends "main.html" %}
 {% block content %}
-    {% if user and category.user_id == user.id %}
-        <div class="category-item-header">
-            <h4>{{category.name}} ({{items|length}})</h4>
+    <div class="category-item-header">
+        <h4>Total items <span class="show-sm">for {{category.name}}</span> ({{items|length}})</h4>
+        {% if user and category.user_id == user.id %}
             <a href="{{url_for('editCategory', category_id=category.id)}}">Edit Category</a>
             <a href="{{url_for('deleteCategory', category_id=category.id)}}">Delete Category</a>
-        </div>
-    {% endif %}
+        {% endif %}
+    </div>
 {% include "item-accordian.html" %}
 {% endblock %}

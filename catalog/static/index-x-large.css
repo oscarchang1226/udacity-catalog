@@ -1,0 +1,22 @@
+body {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.hide-x-lg {
+    display:none;
+}
+.show-x-lg {
+    display: block;
+}
+header div.options.show-menu {
+    opacity: 0;
+    transform: translate(0, -180px);
+}
+header div.display > span {
+    margin: auto 8px;
+}
+header div.display > form {
+    height: auto;
+    width: auto;
+}
