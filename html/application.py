@@ -7,6 +7,8 @@ import google_utils
 import json
 # from dummy import items, item, categories, category
 
+import logging
+from logging.handlers import RotatingFileHandler
 
 def render(template, **params):
     params["categories"] = utils.getCategories()
@@ -39,9 +41,7 @@ def checkOwner(ownerId):
     uid = int(session["u-cookie"].split("|")[1])
     return ownerId == uid
 
-
 app = Flask(__name__)
-
 
 @app.route("/")
 def home():
@@ -397,8 +397,13 @@ def itemApi(item_id):
     item = utils.getItemById(item_id)
     return jsonify(item=item.serialize)
 
-
-if __name__ == "__main__":
-    app.secret_key = "secret_key"
-    app.debug = True
-    app.run(host="0.0.0.0", port=5000)
+if __name__ == '__main__':
+	app.secret_key = '\xb9n"\x85cR\xd3\xeb\x86\x92\x928\xfe\x9d\x8d\xd6\xf1\x11\xd6\xcb\\!\xdb\x9d'
+	app.debug = True
+	if app.debug:
+		handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=1)
+		handler.setLevel(logging.ERROR)
+		formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+		handler.setFormatter(formatter)
+		app.logger.addHandler(handler)
+	app.run()

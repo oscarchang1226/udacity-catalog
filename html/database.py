@@ -8,6 +8,7 @@ import datetime
 
 Base = declarative_base()
 
+DB_URL = 'postgresql://catalog:catalog@localhost:5432/catalog'
 
 class User(Base):
     __tablename__ = "user"
@@ -78,6 +79,7 @@ class Item(Base):
         }
 
 
-engine = create_engine("sqlite:///catalog.db")
+#engine = create_engine("sqlite:///catalog.db")
+engine = create_engine(DB_URL)
 
 Base.metadata.create_all(engine)

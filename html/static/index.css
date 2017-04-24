@@ -33,6 +33,9 @@ span.show-sm {
 .show-md {
     display: none;
 }
+.show-sm.show-md {
+	display: block;
+}
 .show-lg {
     display: none;
 }

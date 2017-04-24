@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, func
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 
-from database import Base, User, Category, Item
+from database import Base, User, Category, Item, DB_URL
 
 import string
 import random
@@ -12,11 +12,13 @@ import bleach
 PASSWORD_RE = re.compile(r"^[a-zA-Z0-9].{3,20}$")
 EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
 
-engine = create_engine("sqlite:///catalog.db")
+#engine = create_engine("sqlite:///catalog.db")
+engine = create_engine(DB_URL)
 Base.metadata.bind = engine
 
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
+#DBSession = sessionmaker(bind=engine)
+#session = DBSession()
+session = scoped_session(sessionmaker(bind=engine))
 
 
 def emailIsValid(email):
